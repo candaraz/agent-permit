@@ -1,0 +1,10 @@
+{
+ "contract": "0x25dfbcffcc844012f7dab492e863906de5a5609b",
+ "txHash": "0xa8d1f787ffb65e28784e59836760a79a9aa911ef9513e4bb47fea5ff5d042823",
+ "proxy": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+ "status": 1,
+ "gasUsed": 2657374,
+ "codeBytes": 11765,
+ "block": 134326084,
+ "deployer": "0x1C73877184F0071781E94F17b2d10704022a85BA"
+}
