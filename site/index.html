@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgentPermit — spend permits between Binance Agent ID holders</title>
+<meta name="description" content="Standing spend permits between Binance Agent ID (.ai) holders on BNB Chain. Agent ID enforced on-chain." />
+<style>
+  :root { --bg:#0d0f14; --panel:#151922; --line:#232a36; --fg:#e6edf3; --dim:#7d8590; --acc:#1f6feb; --ok:#3fb950; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg);
+    font:16px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace; }
+  a { color:var(--acc); }
+  .wrap { max-width:860px; margin:0 auto; padding:48px 20px 96px; }
+  h1 { font-size:30px; margin:0 0 6px; letter-spacing:-.5px; }
+  h2 { font-size:19px; margin:44px 0 12px; color:var(--fg); }
+  .sub { color:var(--dim); margin:0 0 28px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:14px 0; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; }
+  .kv { flex:1 1 220px; }
+  .k { color:var(--dim); font-size:12px; text-transform:uppercase; letter-spacing:.08em; }
+  .v { font-size:14px; word-break:break-all; margin-top:3px; }
+  .v a { word-break:break-all; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; font-size:14px; }
+  th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--dim); font-weight:400; font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+  code { background:#0a0c10; border:1px solid var(--line); border-radius:4px; padding:1px 5px; font-size:13px; }
+  pre { background:#0a0c10; border:1px solid var(--line); border-radius:8px; padding:14px 16px; overflow-x:auto; font-size:13px; }
+  .ok { color:var(--ok); }
+  .warn { color:#d29922; }
+  ul { padding-left:20px; }
+  li { margin:5px 0; }
+  footer { margin-top:56px; padding-top:20px; border-top:1px solid var(--line); color:var(--dim); font-size:13px; }
+  .pill { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:12px; color:var(--dim); margin-right:6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>AgentPermit</h1>
+  <p class="sub">Standing spend permits between Binance <strong>Agent&nbsp;ID</strong> (<code>.ai</code>) holders, on BNB Chain.</p>
+
+  <div class="card">
+    <div class="row">
+      <div class="kv">
+        <div class="k">Contract</div>
+        <div class="v"><a href="https://bscscan.com/address/0x25dfbcffcc844012f7dab492e863906de5a5609b">0x25dfbcffcc844012f7dab492e863906de5a5609b</a></div>
+      </div>
+      <div class="kv">
+        <div class="k">Chain</div>
+        <div class="v">BNB Smart Chain (56)</div>
+      </div>
+      <div class="kv">
+        <div class="k">Source</div>
+        <div class="v"><a href="https://github.com/candaraz/agent-permit">github.com/candaraz/agent-permit</a></div>
+      </div>
+      <div class="kv">
+        <div class="k">Verification</div>
+        <div class="v ok">Sourcify exact_match</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>What it does</h2>
+  <p>
+    A permit lets one Agent&nbsp;ID holder (the <strong>principal</strong>) cap how much another
+    Agent&nbsp;ID holder (the <strong>spender</strong>) may send it, for a bounded window.
+    The contract never holds anyone's funds: the only value movement possible is BNB sent by
+    the spender to the principal, bounded by the permit cap and expiry.
+  </p>
+  <p>
+    Every state-changing call checks the SPACE&nbsp;ID Agent&nbsp;ID registry on-chain.
+    The registry lives at <code>0x60b9262456de011f7d15a54cdd8c48baaa8b022f</code> (ERC-721,
+    soulbound, one per user). This contract only reads <code>balanceOf</code> and
+    <code>handleOf</code> from it, and never resolves a handle back to an address.
+  </p>
+
+  <h2>Agent ID is load-bearing</h2>
+  <table>
+    <tr><th>Action</th><th>Requirement</th></tr>
+    <tr><td><code>mintBadge()</code></td><td>caller holds an Agent&nbsp;ID</td></tr>
+    <tr><td><code>createPermit()</code></td><td><strong>both</strong> principal and spender hold an Agent&nbsp;ID</td></tr>
+    <tr><td><code>spend()</code></td><td>the spender still holds an Agent&nbsp;ID</td></tr>
+    <tr><td><code>revoke()</code></td><td>only the principal</td></tr>
+  </table>
+
+  <h2>Permission disclosure</h2>
+  <p>
+    No owner. No admin. No fee. No pause. No upgrade. No blacklist. No tax.
+    No arbitrary transfer function. The registry address and the badge supply cap are immutable.
+    A permit can only move BNB from its own spender to its own principal, and only while it is
+    active and under cap. The principal can revoke at any time. There is no path by which a
+    third party's funds move.
+  </p>
+
+  <h2>Badge</h2>
+  <p>
+    One ERC-721 badge per Agent&nbsp;ID holder, free, gas only. The metadata is fully on-chain:
+    the holder's <code>.ai</code> handle is rendered as an SVG inside a standard ERC-721 JSON
+    metadata document. No IPFS, no external image host.
+  </p>
+
+  <h2>How to use it</h2>
+  <p>Claim your own Agent ID first — it can only be done inside the Binance App:</p>
+  <pre>Wallet → homepage banner → Agent ID</pre>
+  <p>Then, from a wallet that holds one:</p>
+  <pre>// 1. mint the free badge
+mintBadge()
+
+// 2. principal allows a spender, capped and time-bounded
+createPermit(spender, cap, duration)   // duration: 1 hour – 30 days
+
+// 3. the spender sends value under the permit
+spend(permitId)                        // payable
+
+// 4. the principal can pull it back at any time
+revoke(permitId)</pre>
+
+  <h2>Read the chain</h2>
+  <pre>holdsAgentId(address)   -> bool
+handleOf(address)         -> string        // .ai handle, display only
+remaining(permitId)       -> uint256       // wei still spendable
+isActive(permitId)        -> bool
+permitInfo(permitId)      -> (principal, spender, handle, cap, spent, expiry, revoked)
+permitsOf(principal)      -> uint256[]
+badgeOf(address)          -> uint256</pre>
+
+  <h2>Try it on your own chain</h2>
+  <p>Any wallet with an Agent&nbsp;ID can call the contract directly. The badge mint costs only gas.</p>
+
+  <h2>Status</h2>
+  <p>
+    <span class="pill">deployed</span>
+    <span class="pill">sourcify exact_match</span>
+    <span class="pill">tests: 17 passing</span>
+    <span class="pill">no owner / no admin</span>
+  </p>
+
+  <footer>
+    Built for the Binance Wallet × BNB Chain Agent ID Hackathon. MIT licensed.<br />
+    Not affiliated with, endorsed by, or impersonating Binance or BNB Chain. Not financial advice.
+  </footer>
+
+</div>
+</body>
+</html>
